@@ -1,0 +1,9 @@
+--index-url http://pypi.douban.com/simple/
+--extra-index-url http://mirrors.aliyun.com/pypi/simple/
+--allow-external PIL
+--allow-unverified PIL
+tornado>=4.5
+redis>=2.10.6
+MySQL-python>=1.2.5
+qiniu>=7.0.7
+psycopg2>=2.7.1
