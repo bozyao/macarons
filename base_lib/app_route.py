@@ -90,22 +90,6 @@ class RequestHandler(tornado.web.RequestHandler):
         if self.settings.get("debug", False):
             self.access_control_allow()
 
-    def get_argument(self, name, default=None, strip=True):
-        if self.request.headers.get('Content-Type', '') == 'application/json':
-            name = to_unicode(name)
-            return self.request.body_arguments.get(name, default)
-        else:
-            return self._get_argument(name, default, self.request.arguments, strip)
-
-    def get_params(self):
-        # 参数获取
-        if self.request.headers.get('Content-Type', '') == 'application/json':
-            self.data = self.request.body_arguments
-        else:
-            for k in self.request.arguments.keys():
-                self.data[k] = self._get_argument(k, '', self.request.arguments, True)
-        return self.data
-
     def access_control_allow(self):
         # 允许 JS 跨域调用
         self.set_header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
@@ -179,12 +163,6 @@ class RequestHandler(tornado.web.RequestHandler):
         if not data.get("error_code", 0):
             data["error_code"] = 0
 
-        # 适配qf返回
-        if data["error_code"] == 0:
-            data["respcd"] = "0000"
-
-        data.pop("error_code")
-
         if max_age and not self.session:
             self.set_header("Cache-Control", "public max-age=%s" % max_age)
 
@@ -194,15 +172,7 @@ class RequestHandler(tornado.web.RequestHandler):
 
     # 统一错误输出
     def ret_error(self, error_info="", msg='', error_code='2400'):
-
-        # 适配qf返回
-        if not error_info and msg:
-            error_info = ERROR_MSG_CODE.get(msg, '')
-
-        data = {
-            "respcd": ERROR_CODE.get(error_info, error_code),
-            "resperr": ERROR_MSG.get(error_info, msg) if not msg else msg
-        }
+        data = {"error_code": ERROR_CODE.get(error_info, 11111), "error_msg": msg}
 
         logging.info(self.ret_log(data))
         self.write(json.dumps(data, default=format_date))
