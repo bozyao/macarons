@@ -5,18 +5,17 @@ import os
 import socket
 import sys
 import time
-
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
+from logging.handlers import TimedRotatingFileHandler
 from tornado.options import define, options
-from logging.handlers import TimedRotatingFileHandler, WatchedFileHandler
+
+from base_lib.app_route import Application, URL_PREFIX
 
 path = os.path.dirname(os.path.abspath(__file__))
 if path not in sys.path:
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-from base_lib.app_route import Application, URL_PREFIX
 
 socket.setdefaulttimeout(10)
 default_encoding = 'utf-8'
@@ -27,6 +26,7 @@ if sys.getdefaultencoding() != default_encoding:
 try:
     print("Load local setting...")
     new_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    new_path = os.path.dirname(new_path)
     if new_path not in sys.path:
         sys.path.append(new_path)
 
@@ -160,7 +160,7 @@ def config_logger(options):
     logger.setLevel(getattr(logging, options.logging.upper()))
     formatter = logging.Formatter(
         fmt='%(asctime)s.%(msecs)03d %(levelname)1.1s %(process)5d:%(threadName)-7.7s '
-            '%(module)10.10s:%(lineno)04d $$%(message)s',
+            '%(module)10.10s:%(lineno)04d $$ %(message)s',
         datefmt='%y%m%d %H:%M:%S'
     )
     if options.log_file_prefix:
@@ -176,8 +176,8 @@ def config_logger(options):
         logger.addHandler(channel)
 
     if logger.handlers:
-            for l in logger.handlers:
-                l.setFormatter(formatter)
+        for l in logger.handlers:
+            l.setFormatter(formatter)
 
 
 def run(path="", port=8800, url_prefix=URL_PREFIX, use_session=True, debug=False):
@@ -211,7 +211,7 @@ def run(path="", port=8800, url_prefix=URL_PREFIX, use_session=True, debug=False
         )
     application.use_session = use_session
     http_server.listen(options.port)
-    logging.info('Server start , port: %s' % options.port)
+    logging.info('Server start , debug: %s, port: %s' % (settings["debug"], options.port))
     tornado.ioloop.IOLoop.instance().start()
 
 
