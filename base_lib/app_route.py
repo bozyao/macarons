@@ -78,7 +78,7 @@ class RequestHandler(tornado.web.RequestHandler):
                 pass
 
         self.session = None
-        self.data = {}
+        self.data = self.request.arguments
         self.rid = ''.join(random.sample(string.digits, 6))
         self.start_time = time.time()
         if self.application.use_session:
@@ -211,13 +211,10 @@ def check_session(permission="login"):
     def fc(func):
         def _(self, *args, **argitems):
 
-            # TEST
-            # return func(self, *args, **argitems)
-
-            if not self.session or not self.session.get("userid"):
+            if not self.session or not self.session.get("user_id"):
                 self.ret_error("SESSIONERR", "需要登录后才可以操作哦")
             else:
-                logging.info("User session checked by user_id: %s" % self.session.get("userid", ""))
+                logging.info("User session checked by user_id: %s" % self.session.get("user_id", ""))
                 return func(self, *args, **argitems)
 
         return _

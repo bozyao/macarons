@@ -10,13 +10,14 @@ import tornado.httpserver
 import tornado.ioloop
 import tornado.web
 from tornado.options import define, options
-from logging.handlers import TimedRotatingFileHandler, WatchedFileHandler
+from logging.handlers import TimedRotatingFileHandler
+
+from base_lib.app_route import Application, URL_PREFIX
 
 path = os.path.dirname(os.path.abspath(__file__))
 if path not in sys.path:
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from base_lib.app_route import Application, URL_PREFIX
 
 socket.setdefaulttimeout(10)
 default_encoding = 'utf-8'
@@ -27,6 +28,7 @@ if sys.getdefaultencoding() != default_encoding:
 try:
     print("Load local setting...")
     new_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    new_path = os.path.dirname(new_path)
     if new_path not in sys.path:
         sys.path.append(new_path)
 
@@ -35,7 +37,7 @@ except ImportError as e:
     print(e)
     print("Load local setting error, load base settings...")
 
-    from base_conf.settings import settings, LOAD_MODULE, REJECT_MODULE, LOGFILE
+    from .base_conf.settings import settings, LOAD_MODULE, REJECT_MODULE, LOGFILE
 
 
 class MyHandler(TimedRotatingFileHandler):
@@ -176,8 +178,8 @@ def config_logger(options):
         logger.addHandler(channel)
 
     if logger.handlers:
-            for l in logger.handlers:
-                l.setFormatter(formatter)
+        for l in logger.handlers:
+            l.setFormatter(formatter)
 
 
 def run(path="", port=8800, url_prefix=URL_PREFIX, use_session=True, debug=False):
@@ -198,8 +200,8 @@ def run(path="", port=8800, url_prefix=URL_PREFIX, use_session=True, debug=False
     load_module(application, path)
 
     http_server = tornado.httpserver.HTTPServer(application, xheaders=True)
-    from base_lib.tools import session
-    from base_lib.dbpool import acquire
+    from .base_lib.tools import session
+    from .base_lib.dbpool import acquire
 
     if use_session:
         sessiion_db = settings.get("session_db", "")
@@ -211,7 +213,7 @@ def run(path="", port=8800, url_prefix=URL_PREFIX, use_session=True, debug=False
         )
     application.use_session = use_session
     http_server.listen(options.port)
-    logging.info('Server start , port: %s' % options.port)
+    logging.info('Server start , debug: %s, port: %s' % (settings["debug"], options.port))
     tornado.ioloop.IOLoop.instance().start()
 
 
