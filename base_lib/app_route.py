@@ -131,17 +131,17 @@ class RequestHandler(tornado.web.RequestHandler):
     # 捕捉未处理的异常,统一处理返回
     def write_error(self, status_code, **kwargs):
         self.set_status(status_code)
-        errot_info = ["请求出了点问题，攻城狮正在火速解决~", "SERVERERR"]
+        error_info = ["请求出了点问题，攻城狮正在火速解决~", "SERVERERR"]
         try:
-            tmp_errot_info = kwargs.get("exc_info", ("", ("", "")))[1]
-            errot_info[0] = tmp_errot_info.args[0]
-            if self.settings.get("debug", False) and len(tmp_errot_info.args) > 1:
-                errot_info[0] += ":" + tmp_errot_info.args[1]
+            tmp_error_info = kwargs.get("exc_info", ("", ("", "")))[1]
+            error_info[0] = tmp_error_info.args[0]
+            if self.settings.get("debug", False) and len(tmp_error_info.args) > 1:
+                error_info[0] += ":" + tmp_error_info.args[1]
         except Exception as e:
             logging.error("Return error error, info:%s" % e)
 
         logging.error("status:%s error_info:%s" % (status_code, kwargs))
-        return self.ret_error(errot_info[1], errot_info[0])
+        return self.ret_error(error_info[1], error_info[0])
 
     # 输出日志处理
     def ret_log(self, data):
@@ -160,8 +160,8 @@ class RequestHandler(tornado.web.RequestHandler):
                 logging.error("Load json error: %s" % e)
                 return self.ret_error("CONTENTERR", "服务器开小差了，攻城狮正在火速解决~")
 
-        if not data.get("error_code", 0):
-            data["error_code"] = 0
+        # if not data.get("error_code", 0):
+        #    data["error_code"] = 0
 
         if max_age and not self.session:
             self.set_header("Cache-Control", "public max-age=%s" % max_age)
@@ -171,7 +171,7 @@ class RequestHandler(tornado.web.RequestHandler):
         return
 
     # 统一错误输出
-    def ret_error(self, error_info="", msg='', error_code='2400'):
+    def ret_error(self, error_info="", msg=''):
         data = {"error_code": ERROR_CODE.get(error_info, 11111), "error_msg": msg}
 
         logging.info(self.ret_log(data))
