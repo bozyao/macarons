@@ -8,12 +8,12 @@ try:
 
     logging.info("Data config by local......")
 except ImportError:
-    from base_conf.settings import database, BASE_DB, settings
+    from ..base_conf.settings import database, BASE_DB, settings
 
     logging.info("Data config by base......")
 
-from base_lib.dbpool import with_database_class, install
-from base_lib import dbpool
+from ..base_lib.dbpool import with_database_class, install
+from ..base_lib import dbpool
 
 if settings.get("debug", False):
     logging.info("Running in debugging mode......")
