@@ -150,8 +150,7 @@ def scan_dir(path, hfs=[]):
 
 def config_logger(options):
     import logging
-    if options is None:
-        from tornado.options import options
+    # from tornado.options import options
 
     if options.logging is None or options.logging.lower() == 'none':
         return
@@ -191,6 +190,10 @@ def run(path="", port=8800, url_prefix=URL_PREFIX, use_session=True, debug=False
 
     if LOGFILE and not options.log_file_prefix:
         options.log_file_prefix = LOGFILE
+
+    if settings["debug"]:
+        options.logging = "debug"
+
     config_logger(options)
 
     if not path:
