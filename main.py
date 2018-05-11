@@ -162,6 +162,7 @@ def config_logger(options):
             '%(module)10.10s:%(lineno)04d $$ %(message)s',
         datefmt='%y%m%d %H:%M:%S'
     )
+    logger.handlers = []
     if options.log_file_prefix:
         print("Set logging config with file at %s" % options.log_file_prefix)
         channel = MyHandler(filename=options.log_file_prefix)
@@ -171,6 +172,7 @@ def config_logger(options):
 
     if options.log_to_stderr or (options.log_to_stderr is None and not logger.handlers):
         print("Set logging config with stdout.")
+
         channel = logging.StreamHandler()
         logger.addHandler(channel)
 
@@ -190,10 +192,8 @@ def run(path="", port=8800, url_prefix=URL_PREFIX, use_session=True, debug=False
 
     if LOGFILE and not options.log_file_prefix:
         options.log_file_prefix = LOGFILE
-
     if settings["debug"]:
-        options.logging = "debug"
-
+        options.logging = "DEBUG"
     config_logger(options)
 
     if not path:
