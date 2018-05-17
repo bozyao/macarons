@@ -1,6 +1,7 @@
 # coding: utf-8
 import json
 import logging
+import traceback
 from datetime import datetime, date
 
 try:
@@ -95,11 +96,15 @@ class BaseModel:
         """
         if not self.__table__:
             return 0
+
+        if "id" not in dir(self):
+            self.__id__ = "id"
         try:
             if self.real_dict().get(self.__id__, 0):
                 return self.update()
             return self.db.insert(self.__table__, self.real_dict())
         except:
+            logging.warning(traceback.format_exc())
             return 0
 
     def insert(self):
@@ -119,6 +124,9 @@ class BaseModel:
         @param:
         @return: 成功与否
         """
+
+        if "id" not in dir(self):
+            self.__id__ = "id"
         if not self.__table__ or not self.real_dict().get(self.__id__, 0):
             return 0
         try:
@@ -134,6 +142,9 @@ class BaseModel:
         """
         if not self.__table__:
             return 0
+
+        if "id" not in dir(self):
+            self.__id__ = "id"
         if not where:
             if self.real_dict().get(self.__id__, ""):
                 where = {self.__id__: self.real_dict()[self.__id__]}
@@ -151,6 +162,9 @@ class BaseModel:
         """
         if not self.__table__:
             return 0
+
+        if "id" not in dir(self):
+            self.__id__ = "id"
         ret = self.db.delete(self.__table__, {self.__id__: id})
         return ret
 
@@ -162,6 +176,8 @@ class BaseModel:
         if not self.__table__:
             return {}
 
+        if "id" not in dir(self):
+            self.__id__ = "id"
         ret = self.db.select(self.__table__, {self.__id__: id}, self.__fields__)
         if ret:
             # return self.to_json(ret[0])
@@ -241,6 +257,8 @@ class BaseModel:
         ids = ",".join([str(data[field]) for data in datas if data[field]])
         if not ids:
             return datas
+        if "id" not in dir(self):
+            self.__id__ = "id"
         infos = self.select(other="where %s in (%s)" % (self.__id__, ids))
         for info in infos:
             for data in datas:
@@ -254,6 +272,8 @@ class BaseModel:
         @param count: 加的数量，默认1，可以是负数
         @return: 成功与否
         """
+        if "id" not in dir(self):
+            self.__id__ = "id"
         try:
             if not self.real_dict().get(self.__id__, ""):
                 logging.error("%s is null" % self.__id__)
@@ -264,11 +284,12 @@ class BaseModel:
             self.execute(sql)
             return True
         except Exception as e:
-            import logging
             logging.error("Add count error, info:%s" % e)
             return False
 
     def get_count(self, where={}, other=""):
+        if "id" not in dir(self):
+            self.__id__ = "id"
         tmp_data = self.select(where, fields="count(%s) as count" % self.__id__, other=other)
         return tmp_data[0]["count"]
 

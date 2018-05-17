@@ -91,7 +91,7 @@ class SessionManager(object):
         except IOError:
             return {}
 
-    def get_session_id(self, request_handler, session_key="QFUSERSESSION"):
+    def get_session_id(self, request_handler, session_key="sid"):
 
         session_id = ""
         if not request_handler.get_argument("sid", ""):
@@ -118,20 +118,20 @@ class SessionManager(object):
             hmac_key = ''
         else:
             session_id = self.get_session_id(request_handler)
-            # hmac_key = request_handler.get_secure_cookie("verification")
-            hmac_key = ''
+            hmac_key = request_handler.get_secure_cookie("verification")
+            # hmac_key = ''
 
         if not session_id:
             session_exists = False
             session_id = self._generate_id()
-            # hmac_key = self._generate_hmac(session_id)
-            hmac_key = ''
+            hmac_key = self._generate_hmac(session_id)
+            # hmac_key = ''
         else:
             session_exists = True
 
-        # check_hmac = self._generate_hmac(session_id)
-        # if hmac_key != check_hmac:
-        #    raise InvalidSessionException()
+        check_hmac = self._generate_hmac(session_id)
+        if hmac_key != check_hmac:
+            raise InvalidSessionException()
 
         session = SessionData(session_id, hmac_key)
         if session_exists:
@@ -140,13 +140,13 @@ class SessionManager(object):
                 session[key] = data
         return session
 
-    def set(self, session, request_handler=None, session_key="QFUSERSESSION"):
+    def set(self, session, request_handler=None, session_key="sid"):
         request_handler.set_cookie(session_key, session.session_id)
-        # request_handler.set_secure_cookie("verification", session.hmac_key)
+        request_handler.set_secure_cookie("verification", session.hmac_key)
 
         session_dict = dict(session.items())
         session_data = json.dumps(session_dict, default=format_date)
-        # self.set_m_db_data(session.session_id, session_data)
+        self.set_m_db_data(session.session_id, session_data)
         if 'userid' in session_dict:
             s_k = 's%s' % session_dict['userid']
             if not self.redis.sismember(s_k, session.session_id):
