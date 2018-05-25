@@ -157,7 +157,7 @@ class RequestHandler(tornado.web.RequestHandler):
             try:
                 data = json.loads(data)
             except Exception as e:
-                logging.error("Load json error: %s" % e)
+                logging.error("Load json error: %s->%s" % (e, data))
                 return self.ret_error("CONTENTERR", "服务器开小差了，攻城狮正在火速解决~")
 
         # if not data.get("error_code", 0):
@@ -213,6 +213,8 @@ def check_session(permission="login"):
             if not self.session or not self.session.get("user_id"):
                 self.ret_error("SESSIONERR", "需要登录后才可以操作哦")
             else:
+                self.user_id = self.session.get("user_id", 0)
+                self.open_id = self.session.get("open_id", "")
                 logging.info("User session checked by user_id: %s" % self.session.get("user_id", ""))
                 return func(self, *args, **argitems)
 

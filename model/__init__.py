@@ -80,10 +80,10 @@ class BaseModel:
         @return: 成功与否
         """
         try:
-            cur_keys = self.__fields__.replace(" ", "")
+            # cur_keys = self.__fields__.replace(" ", "")
             for key in json_data.keys():
-                if key in cur_keys.split(","):
-                    self.__dict__[key] = json_data[key]
+                # if key in cur_keys.split(","):
+                self.__dict__[key] = json_data[key]
             return self
         except Exception as e:
             logging.error(e)
