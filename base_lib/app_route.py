@@ -124,6 +124,7 @@ class RequestHandler(tornado.web.RequestHandler):
         self.ret_error("NOT_FOUND", "404")
 
     def write(self, chunk):
+        logging.info(self.ret_log(chunk))
         if self._finished:
             return
         super(RequestHandler, self).write(chunk)
@@ -166,7 +167,6 @@ class RequestHandler(tornado.web.RequestHandler):
         if max_age and not self.session:
             self.set_header("Cache-Control", "public max-age=%s" % max_age)
 
-        logging.info(self.ret_log(data))
         self.write(json.dumps(data, default=format_date))
         return
 
@@ -174,7 +174,6 @@ class RequestHandler(tornado.web.RequestHandler):
     def ret_error(self, error_info="", msg=''):
         data = {"error_code": ERROR_CODE.get(error_info, 11111), "error_msg": msg}
 
-        logging.info(self.ret_log(data))
         self.write(json.dumps(data, default=format_date))
 
         return

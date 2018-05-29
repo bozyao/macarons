@@ -116,7 +116,8 @@ class DBConnection:
             else:
                 ret = cur.execute(sql)
         except Exception, e:
-            logging.warning(e)
+            raise e
+            # logging.warning(e)
             self.connect()
             if param:
                 ret = cur.execute(sql, param)
