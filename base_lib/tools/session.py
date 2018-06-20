@@ -93,19 +93,7 @@ class SessionManager(object):
 
     def get_session_id(self, request_handler, session_key="sid"):
 
-        session_id = ""
-        if not request_handler.get_argument("sid", ""):
-            t_session_id = request_handler.get_cookie(session_key)
-            session_id = request_handler.get_cookie("sid")
-            if not t_session_id and session_id and len(session_id) == 36:
-                pass
-            elif t_session_id:
-                session_id = t_session_id
-            else:
-                session_id = request_handler.get_secure_cookie(session_key)
-        else:
-            session_id = request_handler.get_argument("sid", "")
-
+        session_id = request_handler.get_cookie(session_key, "")
         return session_id
 
     def _gen_session(self):
@@ -113,7 +101,7 @@ class SessionManager(object):
         hmac_key = self._generate_hmac(session_id)
 
     def get(self, request_handler=None):
-        if (request_handler == None):
+        if not request_handler:
             session_id = None
             hmac_key = ''
         else:
@@ -147,8 +135,8 @@ class SessionManager(object):
         session_dict = dict(session.items())
         session_data = json.dumps(session_dict, default=format_date)
         self.set_m_db_data(session.session_id, session_data)
-        if 'userid' in session_dict:
-            s_k = 's%s' % session_dict['userid']
+        if 'user_id' in session_dict:
+            s_k = 's%s' % session_dict['user_id']
             if not self.redis.sismember(s_k, session.session_id):
                 c = self.redis.scard(s_k)
                 while c >= 20:
@@ -158,8 +146,8 @@ class SessionManager(object):
 
         self.redis.setex(session.session_id, self.session_timeout, session_data)
 
-    def clear(self, userid):
-        s_k = 's%s' % userid
+    def clear(self, user_id):
+        s_k = 's%s' % user_id
         session_set = self.redis.smembers(s_k)
         if not session_set:
             return
@@ -169,8 +157,8 @@ class SessionManager(object):
 
     def remove(self, session):
         # self.rm_m_db_data(session.session_id)
-        if 'userid' in session:
-            s_k = 's%s' % session['userid']
+        if 'user_id' in session:
+            s_k = 's%s' % session['user_id']
             self.redis.srem(s_k, session.session_id)
         self.redis.delete(session.session_id)
 
