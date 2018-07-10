@@ -209,12 +209,19 @@ def check_session(permission="login"):
 
     def fc(func):
         def _(self, *args, **argitems):
+            if permission == "admin":
+                if not self.session or self.session.get("role", 0) != 100:
+                    self.ret_error("SESSIONERR", "需要登录后才可以操作哦")
+                    return
+                else:
+                    return func(self, *args, **argitems)
             if not self.session or not self.session.get("user_id", 0):
                 cookie_session_key = "sid"
                 if self.get_cookie(cookie_session_key, ""):
                     self.clear_all_cookies()
                     # self.clear_cookie(cookie_session_key)
                 self.ret_error("SESSIONERR", "需要登录后才可以操作哦")
+                return
             else:
                 self.user_id = self.session.get("user_id", 0)
                 self.current_user = self.session.get("user_id", 0)
