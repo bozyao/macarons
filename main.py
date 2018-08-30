@@ -165,7 +165,7 @@ def config_logger(options):
     logger.handlers = []
     if options.log_file_prefix:
         print("Set logging config with file at %s" % options.log_file_prefix)
-        channel = MyHandler(filename=options.log_file_prefix)
+        channel = MyHandler(filename=options.log_file_prefix, backup_count=30)
         if logger.handlers:
             del logger.handlers[:]
         logger.addHandler(channel)
