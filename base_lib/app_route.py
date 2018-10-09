@@ -24,10 +24,13 @@ def format_date(obj):
         @param obj: 需要转换的对象
         @return: 转换后的样子
     """
+    import decimal
     if isinstance(obj, datetime):
         return obj.strftime('%Y-%m-%d %H:%M:%S')
-    if isinstance(obj, date):
+    elif isinstance(obj, date):
         return obj.strftime('%Y-%m-%d')
+    elif isinstance(obj, decimal.Decimal):
+        return float(obj)
 
 
 class Application(tornado.web.Application):
@@ -221,6 +224,9 @@ def check_session(permission="login"):
                     self.clear_all_cookies()
                     # self.clear_cookie(cookie_session_key)
                 self.ret_error("SESSIONERR", "需要登录后才可以操作哦")
+                return
+            elif permission == "benefit" and self.session.get("role", 0) != 1:
+                self.ret_error("SESSIONERR", "没有分润权限")
                 return
             else:
                 self.user_id = self.session.get("user_id", 0)
