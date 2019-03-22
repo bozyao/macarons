@@ -105,24 +105,25 @@ class DBConnection:
 
     def cursor(self):
         return self.conn.cursor()
-
+    
     @timeit
     def execute(self, sql, param=None):
         logging.debug(sql)
         cur = self.conn.cursor()
         try:
             if param:
-                ret = cur.execute(sql, param)
+                cur.execute(sql, param)
             else:
-                ret = cur.execute(sql)
+                cur.execute(sql)
         except Exception, e:
             raise e
             # logging.warning(e)
             self.connect()
             if param:
-                ret = cur.execute(sql, param)
+                cur.execute(sql, param)
             else:
-                ret = cur.execute(sql)
+                cur.execute(sql)
+        ret = cur.fetchall()
         cur.close()
         return ret
 
