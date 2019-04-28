@@ -31,7 +31,7 @@ def timeit(func):
                          dbcf.get('host', ''), dbcf.get('port', 0),
                          os.path.basename(dbcf.get('db', '')),
                          int((end - start) * 1000000),
-                         repr(args[1]), err)
+                         repr(args[1])[:100], err)
 
     return _
 
@@ -108,7 +108,7 @@ class DBConnection:
     
     @timeit
     def execute(self, sql, param=None):
-        logging.debug(sql)
+        # logging.debug(sql[:200])
         cur = self.conn.cursor()
         try:
             if param:
