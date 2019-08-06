@@ -14,7 +14,7 @@ from tornado.escape import json_decode, to_unicode
 from .error_code import ERROR_CODE, ERROR_MSG, ERROR_MSG_CODE
 from .tools.session import Session
 
-EXECUTOR = ThreadPoolExecutor(thread_name_prefix="NX")
+EXECUTOR = ThreadPoolExecutor()
 
 URL_PREFIX = "/api"
 
