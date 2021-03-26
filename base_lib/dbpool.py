@@ -195,7 +195,8 @@ class DBConnection:
                 v = v.encode(charset)
             if v.startswith(('now()', 'md5(')):
                 return v
-            return "'%s'" % self.escape(v)
+            # v = self.escape(v)
+            return "'%s'" % v if not v or v[0] != "'" else v
         elif isinstance(v, datetime.datetime):
             return "'%s'" % str(v)
         elif isinstance(v, DBFunc):
@@ -206,17 +207,22 @@ class DBConnection:
             return str(v)
 
     def dict2sql(self, d, sp=','):
+        space_char = '"' if isinstance(self, PGConnection) else '`'
         """字典可以是 {name:value} 形式，也可以是 {name:(operator, value)}"""
         x = []
         for k, v in d.items():
             if isinstance(v, types.TupleType):
                 x.append('%s' % self.exp2sql(k, v[0], v[1]))
             else:
-                x.append('`%s`=%s' % (k.strip(' `').replace('.', '`.`'), self.value2sql(v)))
+                x.append('%s%s%s=%s' % (space_char,
+                                        k.strip(' %s'%space_char).replace('.', '%s.%s'%(space_char, space_char)),
+                                        space_char, self.value2sql(v)))
         return sp.join(x)
 
     def exp2sql(self, key, op, value):
-        item = '(`%s` %s ' % (key.strip('`').replace('.', '`.`'), op.strip())
+        space_char = '"' if isinstance(self, PGConnection) else '`'
+        item = '(%s%s%s %s ' % (space_char, key.strip(space_char).replace('.', '%s.%s'%(space_char, space_char)),
+                                space_char, op.strip())
         if op in ['in', 'not in']:
             item += '(%s))' % ','.join([self.value2sql(x) for x in value])
         elif op == 'between':
@@ -226,11 +232,12 @@ class DBConnection:
         return item
 
     def dict2insert(self, d):
+        space_char = '"' if isinstance(self, PGConnection) else '`'
         keys = d.keys()
         vals = []
         for k in keys:
             vals.append('%s' % self.value2sql(d[k]))
-        new_keys = ['`' + k.strip('`') + '`' for k in keys]
+        new_keys = [space_char + k.strip(space_char) + space_char for k in keys]
         return ','.join(new_keys), ','.join(vals)
 
     def insert(self, table, values):

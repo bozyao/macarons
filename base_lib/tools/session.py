@@ -49,6 +49,7 @@ class Session(SessionData):
         for key, data in raw_data.items():
             self[key] = data
         self.session_manager.set(self, self.request_handler)
+        return self.session_id
 
     def remove(self):
         self.session_manager.remove(self)
