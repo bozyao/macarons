@@ -104,7 +104,7 @@ class BaseModel:
             return self.db.insert(self.__table__, self.real_dict())
         except:
             logging.warning(traceback.format_exc())
-            raise
+            # raise
             return 0
 
     def insert(self):
